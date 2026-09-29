@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meta & AI Tag Checker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center p-6">
+  <div class="max-w-2xl w-full">
+    <header class="text-center my-8">
+      <h1 class="text-3xl font-extrabold text-blue-400">Meta & AI Tag Checker</h1>
+      <p class="text-slate-400 mt-2">Inspect C2PA credentials, IPTC source types, and platform AI markers</p>
+    </header>
+
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+      <form action="/scan" method="post" enctype="multipart/form-data" class="flex flex-col gap-4">
+        <label class="border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition">
+          <svg class="w-10 h-10 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+          </svg>
+          <span class="text-sm font-medium text-slate-300">Select or drop an image file (JPG, PNG, WebP)</span>
+          <input type="file" name="file" accept="image/*" class="hidden" onchange="this.form.submit()" required>
+        </label>
+      </form>
+
+      {% if result %}
+      <div class="mt-8 pt-6 border-t border-slate-800">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-400 text-sm">Target: <strong class="text-slate-200">{{ result.filename }}</strong></span>
+          {% if result.is_ai %}
+            <span class="px-3 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded-full text-xs font-semibold">AI Signals Detected</span>
+          {% else %}
+            <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full text-xs font-semibold">No AI Metadata Found</span>
+          {% endif %}
+        </div>
+
+        {% if result.signals %}
+        <div class="mt-4 bg-red-950/20 border border-red-900/40 rounded-lg p-4">
+          <h3 class="text-sm font-semibold text-red-300 mb-2">Detected Provenance / Indicators:</h3>
+          <ul class="list-disc list-inside text-xs text-red-200 space-y-1">
+            {% for signal in result.signals %}
+              <li>{{ signal }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        {% if result.metadata_sample %}
+        <div class="mt-4 bg-slate-950 rounded-lg p-4 border border-slate-800">
+          <h3 class="text-xs uppercase font-semibold text-slate-400 tracking-wider mb-2">Extracted Metadata</h3>
+          <pre class="text-xs text-slate-300 overflow-x-auto whitespace-pre-wrap">{{ result.metadata_sample | tojson(indent=2) }}</pre>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
